@@ -14,3 +14,5 @@ As an ergodic process, MKRAND produces a statistically homogenous random bitstre
   
 Note - Format 0 file output broken, see issues.
   
+
+![build](https://api.travis-ci.org/mknight-tag/MKRAND.svg?branch=master)
