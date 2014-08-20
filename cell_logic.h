@@ -56,6 +56,7 @@ void frame_put_row(frame_t* f, uint8_t row, vec128bec_t* v);
 typedef enum {CELL_NIL, CELL_TRUE, CELL_FALSE, CELL_NULL} cell_state_t;
 
 uint8_t vecbe_get_byte(uint8_t byte_num, vec128bec_t* v);
+uint32_t vecbe_hamming_weight (vec128bec_t* vec);
 cell get_cell(vec128bec_t* v, uint8_t index);
 uint8_t set_cell(vec128bec_t* v, uint8_t index, cell c);
 

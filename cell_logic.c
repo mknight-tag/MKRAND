@@ -34,7 +34,7 @@
 void halt(char* msg)
 {
   printf("HALT: %s\n",msg);
-  exit(1); 
+  exit(EXIT_FAILURE); 
 }
 
 /* Allocate vector memory slot */
@@ -200,6 +200,19 @@ uint8_t vecbe_get_byte(uint8_t byte_num, vec128bec_t* v){
     r = r | (b << (i-offset));  
   }
   return(r);
+}
+
+
+
+uint32_t vecbe_hamming_weight (vec128bec_t* v) {
+  int i = 0;
+  uint32_t w = 0;
+  for (i=1; i<=128; i++){
+    if (get_cell(v, i) == CELL_TRUE) {
+      w += 1;
+    }
+  }
+  return(w);  
 }
 
 

@@ -58,6 +58,8 @@ const char bc[58] = {'A','B','C','D','E','F','G','H',
 
 const int b64_padding = 0;
 
+char* b64triplet = NULL;
+
 /* Convert 3 bytes into 4 base64 characters */
 char* encode_b64_triplet(uint8_t b1, uint8_t b2, uint8_t b3){
   char* r = malloc(5);
@@ -264,13 +266,17 @@ char* fmt_vecbe(vec128bec_t* v, int fmt_type){
                  // 1,2,3  4,5,6  7,8,9  10,11,12  13,14,15
                  for(i=1; i<=5; i++){
                    offset = ((i-1) * 3) + 1;
-                   sprintf(t, "%s", encode_b64_triplet(vecbe_get_byte(offset, v),
-                                                       vecbe_get_byte(offset+1, v),
-                                                       vecbe_get_byte(offset+2, v)));
+                   b64triplet = encode_b64_triplet(vecbe_get_byte(offset, v),
+                                                   vecbe_get_byte(offset+1, v),
+                                                   vecbe_get_byte(offset+2, v));
+                   sprintf(t, "%s", b64triplet);                                                                                                          
                    strcat(r,t);
+
+                   free(b64triplet);
                  }
                  // Remaining byte 16
-                 sprintf(t, "%s", encode_b64_triplet(vecbe_get_byte(16, v), 0,0));
+                 b64triplet = encode_b64_triplet(vecbe_get_byte(16, v), 0,0);
+                 sprintf(t, "%s", b64triplet);
                  // Keep first two hex64 digits and the rest is padding (==) if desired.
                  if (b64_padding) {
                    t[2] = '=';
@@ -280,6 +286,7 @@ char* fmt_vecbe(vec128bec_t* v, int fmt_type){
                    t[2] = '\0';
                  }
                  strcat(r,t);
+                 free(b64triplet);
                  break;
 
        case 13:   sprintf(r,"");
@@ -292,27 +299,6 @@ char* fmt_vecbe(vec128bec_t* v, int fmt_type){
   free(t);
   return(r);
 }
-
-
-/*
-
-Formats:
- 0  -       Pure              EB6609B0DFE7581A4BF8CAA73D00D488                     128-bit Binary
- 1  -       SHA1          e9ed7472-2d31-3eba-add8-9d991fb8e864                        SHA1 Format
- 2  -     BINARY              ...00100000110110001011110000001                   Text Mode Binary
- 3  -   RESERVED                                                                                 
- 4  -       IPV4                                88.222.124.235                       IPV4 Address
- 5  -       GUID         {69FEAFF0-88D2A6C1-AB36-D14C87D1835C}                 Globally Unique ID
- 6  -       IPV6       8122:97be:c3bc:d3ec:f41d:7518:1448:c757                       IPV6 Address
- 7  -   RESERVED                                                                                 
- 8  -        PSI        [<:BAD736590E4CA8B0FF38EDCB7B8F326D:>]                   Time Fingerprint
- 9  -   RESERVED                                                                                 
-10  -        INT                                     943082505            32-bit Unsigned Integer
-11  -    UUID V4          059d7ea4-8e3c-40f3-afbf-87bbb07b847f              Universally Unique ID
-12  -     BASE64                        Eks3x4saGwkd/0o9H48qTQ                      Text Encoding
-13  -   RESERVED                            
-
-*/
 
 
 char* frame_to_str(frame_t* f, int fmt_type) {

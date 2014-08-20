@@ -4,6 +4,8 @@
 
 #include  "cell_logic.h"
 
+#define NUM_FORMATS           14
+
 #define FMT_VEC_BINARY        0
 #define FMT_VEC_SHA1          1
 #define FMT_VEC_BINARY_TEXT   2

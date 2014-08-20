@@ -400,7 +400,7 @@ void mi0_incSDTIME (cell_proc_t *restrict cp){
   }  
 
   if (verbose_flag) {  
-    printf("SDTIME: %s\n",fmt_vecbe(cp->SDTIME, 0));
+    printf("SDTIME: %s\n",fmt_vecbe(cp->SDTIME, FMT_VEC_BINARY));
   }  
 
 }
@@ -497,7 +497,7 @@ void mi1_incR30 (cell_proc_t *restrict cp){
     }
 
     if (verbose_flag) {
-      out_str = fmt_vecbe(cp->CR, 2);
+      out_str = fmt_vecbe(cp->CR, FMT_VEC_BINARY_TEXT);
       printf("[%03d]     %s %c\n", gen, out_str, cell_to_char(get_cell(cp->CR, center_col)));
       free(out_str);
     }
@@ -539,14 +539,14 @@ void pushSD(cell_proc_t* restrict cp) {
   frame_push(cp->SDTIME, cp->Stack);
   frame_push(cp->SDR30,  cp->Stack);
   if (verbose_flag) { 
-     printf("\nPUSHSD\n%s\n", frame_to_str(cp->Stack, 2)); 
+     printf("\nPUSHSD\n%s\n", frame_to_str(cp->Stack, FMT_VEC_BINARY_TEXT)); 
   }  
 }
 
 /* Pop Seed Registers from stack */
 void popSD(cell_proc_t* restrict cp){
   if (verbose_flag) { 
-     printf("\nPOPSD\n%s\n", frame_to_str(cp->Stack, 2)); 
+     printf("\nPOPSD\n%s\n", frame_to_str(cp->Stack, FMT_VEC_BINARY_TEXT)); 
   }   
   frame_pop(cp->Stack, cp->SDR30);
   frame_pop(cp->Stack, cp->SDTIME);  
@@ -560,7 +560,7 @@ void pushGP(cell_proc_t* restrict cp) {
   frame_push(cp->D, cp->Stack);
 
   if (verbose_flag) { 
-     printf("PUSHGP\n%s\n", frame_to_str(cp->Stack, 2)); 
+     printf("PUSHGP\n%s\n", frame_to_str(cp->Stack, FMT_VEC_BINARY_TEXT)); 
   }  
 }
 
@@ -572,7 +572,7 @@ void popGP(cell_proc_t* restrict cp) {
   frame_pop(cp->Stack, cp->A);
 
   if (verbose_flag) { 
-     printf("POPGP\n%s\n", frame_to_str(cp->Stack, 2)); 
+     printf("POPGP\n%s\n", frame_to_str(cp->Stack, FMT_VEC_BINARY_TEXT)); 
   }  
 }
 

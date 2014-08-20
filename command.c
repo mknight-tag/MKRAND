@@ -34,6 +34,7 @@
 #include <inttypes.h>
 #include <getopt.h>
 #include <limits.h>
+#include <math.h>
 #include <errno.h>
 #include "command.h"
 #include "machine_logic.h"
@@ -53,14 +54,15 @@ typedef struct fib_t {
 
 typedef struct profile_t {
   size_t rbps;            // Randomness in bps
+  float entropy;          // H
 } profile_t;
+
+
 
 /* Flag set by ‘--verbose’. */
 int verbose_flag = 0;
 
 int profile_flag = 0;
-
-static int num_formats = 14;
 
 unsigned int uint_limit( unsigned int lower, unsigned int upper, unsigned int val){
     return ((val < lower) ? lower : (val > upper ? upper : val));
@@ -80,40 +82,23 @@ size_t fib (fib_t* f) {
   return (r);
 }
 
-void to_file(char* file_name, size_t num_blocks, int output_format, vec128bec_t* v){
-  FILE * f;
-  size_t i;
-  char* out_str;
-  int wout = 0;
 
-  f = fopen(file_name, "w");
-  
-  if (output_format == 0) {                                  /* Binary File */
-        wout = fwrite(v, 16, num_blocks, f);
-     } else {                                                /* Text File   */
-        for (i = 0; i<num_blocks; i++) {
-          out_str = fmt_vecbe(&v[i], output_format); 
-          if (verbose_flag) {
-             printf("File (%lu): %s\n", strlen(out_str),out_str);
-          }
-          wout += fwrite(strcat(out_str,"\n"), strlen(out_str) , 1, f);
-          free(out_str);
-        }                                                      
-     }
-
-   fclose(f);
-}
-
-void to_stdout(size_t num_blocks, int output_format, vec128bec_t* v){
+void to_stream(FILE* stream, size_t num_blocks, int output_format, vec128bec_t* v){
 size_t i;
 char* out_str;
 
-  for (i=0; i<num_blocks; i++) {
-    out_str = fmt_vecbe(&v[i], output_format);
-    printf("%s\n",out_str);
-    free(out_str);
-  } 
+  if ((output_format == FMT_VEC_BINARY) && (stream != stdout)) {    /* Binary File */                           
+        fwrite(v, sizeof(vec128bec_t), num_blocks, stream);
+  } else {
+      for (i=0; i<num_blocks; i++) {
+        out_str = fmt_vecbe(&v[i], output_format);
+        fprintf(stream,"%s\n",out_str);
+        free(out_str);
+        } 
+  }
 }
+
+
 
 /* Profile
  * Run escalating loads until desired number of seconds have elapsed.
@@ -154,10 +139,29 @@ profile_t profile(cell_proc_t* cp, unsigned int profile_seconds){
               bps = bps / 1000;
         }  
 
-        printf("%0.2f %cbps\n", bps, speed_factor);
         break;
      }
   }
+
+  /* Entropy measurement 
+     Generate 12,800 bits
+     Calculate H per Shannon's Mathematical Theory of Communication
+   */
+  uint32_t weight = 0;
+  double_t p_0 = 0;
+  double_t p_1 = 0;
+
+  for (i=0; i<100; i++) {
+     mi5_time_quantum(cp);
+     weight += vecbe_hamming_weight(cp->R);
+  }
+
+  p_1 = ((double_t) weight) / 12800;     // Probability of Bit = 1
+  p_0 = 1.0 - p_1;                       // Probability of Bit = 0
+  
+  r.entropy =  0.0 - ((p_1 * (log2f(p_1))) + (p_0 * (log2f(p_0))));
+
+  printf("%0.2f %cbps  Entropy (H): %0.5f\n", bps,  speed_factor, r.entropy);
   return (r);
 }
 
@@ -167,24 +171,28 @@ void usage(cell_proc_t* cp){
   
   static usage_t u[14];
   int i;
+
   vec128bec_t* v = vec_alloc();
 
-  for (i=0; i<num_formats; i++){
+  for (i=0; i<NUM_FORMATS; i++){
     mi5_time_quantum(cp);
     vmov(cp->R,v);
 
     switch (i) {
-      case 0: u[i].name = "Pure";
+      case FMT_VEC_BINARY: 
+              u[i].name = "Pure";
               u[i].description = "128-bit Binary";
               u[i].format = fmt_vecbe(v, i);
               break;
 
-      case 1: u[i].name = "SHA1";
+      case FMT_VEC_SHA1: 
+              u[i].name = "SHA1";
               u[i].description = "SHA1 Format";
               u[i].format = fmt_vecbe(v, i);
               break;
 
-      case 2: u[i].name = "BINARY";
+      case FMT_VEC_BINARY_TEXT: 
+              u[i].name = "BINARY";
               u[i].description = "Text Mode Binary";
               u[i].format = malloc(128+1);
               memset(u[i].format, '\0', 128+1);
@@ -198,17 +206,20 @@ void usage(cell_proc_t* cp){
               u[i].format = fmt_vecbe(v, i); 
               break;
 
-      case 4: u[i].name = "IPV4";
+      case FMT_VEC_IPV4: 
+               u[i].name = "IPV4";
                u[i].description = "IPV4 Address";
                u[i].format = fmt_vecbe(v, i);
                break;
 
-      case 5: u[i].name = "GUID";
+      case FMT_VEC_GUID: 
+              u[i].name = "GUID";
               u[i].description = "Globally Unique ID";
               u[i].format = fmt_vecbe(v, i); 
               break;
 
-      case 6: u[i].name = "IPV6";
+      case FMT_VEC_IPV6: 
+              u[i].name = "IPV6";
               u[i].description = "IPV6 Address";
               u[i].format = fmt_vecbe(v,i);
               break;
@@ -218,7 +229,8 @@ void usage(cell_proc_t* cp){
               u[i].format = fmt_vecbe(v, i); 
               break;
 
-      case 8: u[i].name = "PSI";
+      case FMT_VEC_PSI: 
+              u[i].name = "PSI";
               u[i].description = "Time Fingerprint";
               u[i].format = fmt_vecbe(v,i);
               break;
@@ -228,17 +240,20 @@ void usage(cell_proc_t* cp){
               u[i].format = fmt_vecbe(v, i); 
               break;
 
-      case 10: u[i].name = "INT";
+      case FMT_VEC_INT32: 
+               u[i].name = "INT";
                u[i].description = "32-bit Unsigned Integer";
                u[i].format = fmt_vecbe(v,i);
                break;
 
-      case 11: u[i].name = "UUID V4";
+      case FMT_VEC_UUID: 
+              u[i].name = "UUID V4";
               u[i].description = "Universally Unique ID";
               u[i].format = fmt_vecbe(v, i); 
               break;
 
-      case 12: u[i].name = "BASE64";
+      case FMT_VEC_BASE64: 
+              u[i].name = "BASE64";
               u[i].description = "Text Encoding";
               u[i].format = fmt_vecbe(v, i); 
               break;
@@ -259,14 +274,14 @@ void usage(cell_proc_t* cp){
   if (msg == NULL) { halt("Out of Memory");}
   memset(msg, '\0', 10000);
   
-  strcat(msg, "MKRAND - A Randomness Well  [Block Mode von Neumann] (Test Article 1)\n");
+  strcat(msg, "MKRAND - A Randomness Well  [von Neumann] (Test Article 1)\n");
   strcat(msg, "Copyright (c) 2013 TAG Universal Machine.\n\n");
   strcat(msg, "USAGE: mkrand [-f format] [-n blocks] [-o filename] [--profile] [--verbose]\n");
   strcat(msg, "Formats:\n");
 
   printf("%s",msg);
 
-  for (i=0; i<num_formats; i++){
+  for (i=0; i<NUM_FORMATS; i++){
        printf("%2d  - %10s      %40s     %30s\n",i,u[i].name, u[i].format, u[i].description);
        free(u[i].format);
      }  
@@ -278,8 +293,9 @@ int main(int argc, char *argv[])
 {
    int c;
    size_t i;
+   FILE* out_stream;
 
-   int output_format = 0;
+   int output_format = FMT_VEC_BINARY;
    int show_usage = 0;
 
    char* out_file_name = NULL;
@@ -291,8 +307,8 @@ int main(int argc, char *argv[])
 
    /* Set limits for number of blocks */
    size_t num_blocks = 1;
-   const size_t MIN_BLOCKS = 1;
-   const size_t MAX_BLOCKS = 100000; // UINT_MAX;
+   const size_t MIN_BLOCKS = 0;
+   const size_t MAX_BLOCKS = UINT_MAX;
    
    verbose_flag = 0;
    opterr = 0;
@@ -336,7 +352,7 @@ int main(int argc, char *argv[])
  
 
         case 'f':
-           output_format = uint_limit(0, num_formats-1, strtol(optarg, NULL, 10));
+           output_format = uint_limit(0, NUM_FORMATS-1, strtol(optarg, NULL, 10));
            break;
  
          case 'n':
@@ -367,15 +383,33 @@ int main(int argc, char *argv[])
 
      if (show_usage) {
        usage(cp);
-       exit(0);
+       exit(EXIT_SUCCESS);
     }
 
     if (profile_flag) {
       profile(cp, 60);  // ~1 Minute profile
-      exit(0);
+      exit(EXIT_SUCCESS);
     }
 
-    out_vecs = malloc(sizeof(vec128bec_t) * num_blocks);
+    if (out_file_name) {
+      out_stream = fopen(out_file_name, "w");
+      if (out_stream == NULL) { halt ("Error opening output file."); }
+    } else {
+      out_stream = stdout;
+    }
+
+    if (num_blocks == 0) {
+      out_vecs = malloc(sizeof(vec128bec_t));              /* Streaming, one vector at a time */
+      memset(out_vecs, '\0', (sizeof(vec128bec_t)));
+      while (1) {
+        mi5_time_quantum(cp);
+        vcopy(cp->R, &out_vecs[0]);
+        to_stream(out_stream, 1, output_format, out_vecs);
+      }
+    } else {
+      out_vecs = malloc(sizeof(vec128bec_t) * num_blocks); /* Block Mode */
+      memset(out_vecs, '\0', (sizeof(vec128bec_t) * num_blocks));
+    }
 
     if (out_vecs == NULL) { halt ("Command - Out of Memory"); }
 
@@ -384,17 +418,13 @@ int main(int argc, char *argv[])
        vcopy(cp->R, &out_vecs[i]);
     }
 
-    if (out_file_name) {
-      to_file(out_file_name, num_blocks, output_format, out_vecs);
-    } else {
-      to_stdout(num_blocks, output_format, out_vecs);
-    }
+    to_stream(out_stream, num_blocks, output_format, out_vecs);
 
-    if (verbose_flag) { show_cp(cp); }
+    fclose(out_stream);
 
     cp_free(cp);
 
-    return (0);
+    return (EXIT_SUCCESS);
 }
 
 
