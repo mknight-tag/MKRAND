@@ -57,6 +57,7 @@ typedef enum {CELL_NIL, CELL_TRUE, CELL_FALSE, CELL_NULL} cell_state_t;
 
 uint8_t vecbe_get_byte(uint8_t byte_num, vec128bec_t* v);
 uint32_t vecbe_hamming_weight (vec128bec_t* vec);
+uint8_t vecbe_pack(uint8_t* bytes, vec128bec_t* v);
 cell get_cell(vec128bec_t* v, uint8_t index);
 uint8_t set_cell(vec128bec_t* v, uint8_t index, cell c);
 

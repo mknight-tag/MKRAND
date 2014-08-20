@@ -202,7 +202,13 @@ uint8_t vecbe_get_byte(uint8_t byte_num, vec128bec_t* v){
   return(r);
 }
 
-
+uint8_t vecbe_pack(uint8_t* bytes, vec128bec_t* v)
+{
+  for (int i = 0; i<16; i++) {
+    bytes[i] = vecbe_get_byte(i+1, v);
+  }
+  return(16);
+}
 
 uint32_t vecbe_hamming_weight (vec128bec_t* v) {
   int i = 0;

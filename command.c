@@ -86,10 +86,18 @@ size_t fib (fib_t* f) {
 void to_stream(FILE* stream, size_t num_blocks, int output_format, vec128bec_t* v){
 size_t i;
 char* out_str;
-
-  if ((output_format == FMT_VEC_BINARY) && (stream != stdout)) {    /* Binary File */                           
-        fwrite(v, sizeof(vec128bec_t), num_blocks, stream);
-  } else {
+uint8_t* bytes;
+  
+  if ((output_format == FMT_VEC_BINARY) && (stream != stdout)) {    /* Binary File */
+        bytes = malloc(16 * num_blocks);
+        if (bytes == NULL) { halt  ("to_stream : Out of Memory"); }
+        
+        for (i=0; i<num_blocks; i++) {
+           vecbe_pack(&bytes[i*16],&v[i]);
+        }     
+        fwrite(bytes, 16, num_blocks, stream);
+        free(bytes);
+  } else {                                                          /* Text File */
       for (i=0; i<num_blocks; i++) {
         out_str = fmt_vecbe(&v[i], output_format);
         fprintf(stream,"%s\n",out_str);
