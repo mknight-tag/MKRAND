@@ -11,8 +11,7 @@ As an ergodic process, MKRAND produces a statistically homogenous random bitstre
 **Updates since TA-1:**
 * Streaming, use -n 0
 * Profiler now calculates entropy (H)
-  
-Note - Format 0 file output broken, see issues.
+* Fix binary file output format
   
 
 ![build](https://api.travis-ci.org/mknight-tag/MKRAND.svg?branch=master)
