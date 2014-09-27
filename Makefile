@@ -2,20 +2,10 @@
 # Makefile for building: mkrand
 #############################################################################
 
-MAKEFILE      = Makefile
-
 ####### Compiler, tools and options
 
-CC            = gcc
-CXX           = g++
-DEFINES       = 
-CFLAGS        = -std=gnu99 -m64 -pipe -O2 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
-CXXFLAGS      = -m64 -pipe -O2 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
 INCPATH       = -I.
-LINK          = g++
-LFLAGS        = -m64
 LIBS          = $(SUBLIBS)
-AR            = ar cqs
 RANLIB        = 
 TAR           = tar -cf
 COMPRESS      = gzip -9f
@@ -81,7 +71,7 @@ first: all
 all: $(TARGET)
 
 $(TARGET):  $(OBJECTS)  
-	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 
 dist: 
