@@ -158,10 +158,10 @@ char* fmt_vecbe(vec128bec_t* v, int fmt_type){
                     strcat(r,t);
                   }
 
-                  break;
+              break;
 
-      case 3:   sprintf(r,"");
-                break;
+      case 3:   sprintf(r," ");
+                    break;
 
       /* IPV4 */
       case FMT_VEC_IPV4:   
@@ -208,8 +208,8 @@ char* fmt_vecbe(vec128bec_t* v, int fmt_type){
               }
               break;
 
-      case 7:   sprintf(r,"");
-                break;
+      case 7:   sprintf(r," ");
+                    break;
 
       /* PSI Fingerprint 
          Technically this is a complete NDRAND, not just a fingerprint, but for 
@@ -224,8 +224,8 @@ char* fmt_vecbe(vec128bec_t* v, int fmt_type){
                  strcat(r,":>]");
                  break;
 
-      case 9:   sprintf(r,"");
-                break;
+      case 9:   sprintf(r," ");
+                    break;
 
       /* Unsigned 32-bit */           
       case FMT_VEC_INT32 :  
@@ -289,8 +289,8 @@ char* fmt_vecbe(vec128bec_t* v, int fmt_type){
                  free(b64triplet);
                  break;
 
-       case 13:   sprintf(r,"");
-                 break;
+       case 13:   sprintf(r," ");
+                       break;
 
        default:  sprintf(r,"INVALID FORMAT\n");       
       

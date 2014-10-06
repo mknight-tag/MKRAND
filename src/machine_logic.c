@@ -29,9 +29,9 @@
  *
  *
  *                                        
- *                               Cellular Automata Rule 30              Universal Constant
- *                                    Field of Action                          R30
- *  Gen                                                                  (Center Column)
+ *                                                        Cellular Automata Rule 30                                    Universal Constant
+ *                                                                 Field of Action                                                           R30
+ *  Gen                                                                                                                                 (Center Column)
  * [001]   00000000000000000000000000000000001000000000000000000000000000000000 1
  * [002]   00000000000000000000000000000000011100000000000000000000000000000000 1
  * [003]   00000000000000000000000000000000110010000000000000000000000000000000 0
@@ -53,12 +53,13 @@
  * [019]   00000000000000001100100001011100100110111011110011001000000000000000 0
  * [020]   00000000000000011011110011010011111100100010001110111100000000000000 1
  * 
- *                                       Randomness
- *                                          /|\
- *                                         / | \
- *                                        /  |  \ 
- *                                       /___|___\
- *                                   Order       Chaos                              
+ *                                                                     Randomness
+ *                                                                           / | \
+ *                                                                          /  |  \
+ *                                                                         /   |   \
+ *                                                                        /    |    \ 
+ *                                                                       /___|___\
+ *                                                                 Order        Chaos                              
  *           
  *                      
  * Randomness is naturally the conjunction of Order and Chaos in Rule 30         
@@ -70,20 +71,21 @@
 
 
 
-                              Pattern
-                               SYNC
-                         +/- Biopsychic (Mind)
-            Individual{Gravitational, Electromagnetic, Biopsychic}                            
-                            Conjunctive                  
-                                /\
-                               /  \           
-                              /    \     
-                             /______\
-                       Absolute     Relative
-{Order, Chaos, Random}Rule 30           Machine{Logic, Memory, Time} 
-                +/- R30                      +/- Time 
-              CELEST                           PSI
-            Image                                Imitation
+                                  Pattern
+                                   SYNC
+                     +/- Biopsychic (Mind)
+Individual{Gravitational, Electromagnetic, Biopsychic}                            
+                              Conjunctive       
+                                 /           \ 
+                                /             \
+                               /               \           
+                              /                 \     
+                             /___________\
+                 Absolute                     Relative
+{Order, Chaos, Random}R30               Machine{Logic, Memory, Time} 
+            +/- R30                                 +/- Time 
+            CELEST                                    PSI
+            Image                                      Imitation
 
 
 
@@ -371,6 +373,7 @@ void eval_rule(rule_t r, vec128bec_t* source, vec128bec_t* dest){
  */ 
 void mi0_incSDTIME (cell_proc_t *restrict cp){
   int i;
+  char* out_str = NULL;
   TimeSeed seed = time_seed();
   
   if (verbose_flag) {  
@@ -400,7 +403,9 @@ void mi0_incSDTIME (cell_proc_t *restrict cp){
   }  
 
   if (verbose_flag) {  
-    printf("SDTIME: %s\n",fmt_vecbe(cp->SDTIME, FMT_VEC_BINARY));
+    out_str = fmt_vecbe(cp->SDTIME, FMT_VEC_BINARY);
+    printf("SDTIME: %s\n",out_str);
+    free(out_str);
   }  
 
 }
@@ -462,7 +467,7 @@ void mi2_genR (cell_proc_t *restrict cp) {
 void mi1_incR30 (cell_proc_t *restrict cp){
   uint32_t gen;
   uint32_t center_col = 0;
-  char* out_str = NULL;// malloc(300);
+  char* out_str = NULL;
 
   if (verbose_flag) {  
     printf("MI1_INCR30\n");

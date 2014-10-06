@@ -39,7 +39,6 @@
 #include "command.h"
 #include "machine_logic.h"
 #include "fmt_vec.h"
-#include "fmt_cp.h"
 
 typedef struct usage_t {
   char* name;
@@ -152,31 +151,32 @@ profile_t profile(cell_proc_t* cp, unsigned int profile_seconds){
   }
 
   /* Entropy measurement 
-     Generate 12,800 bits
-     Calculate H per Shannon's Mathematical Theory of Communication
+      Calculate H per Shannon's Mathematical Theory of Communication
    */
   uint32_t weight = 0;
+  uint32_t hblocks = 1000; 
   double_t p_0 = 0;
   double_t p_1 = 0;
 
-  for (i=0; i<100; i++) {
+  for (i=0; i<hblocks; i++) {
      mi5_time_quantum(cp);
      weight += vecbe_hamming_weight(cp->R);
   }
 
-  p_1 = ((double_t) weight) / 12800;     // Probability of Bit = 1
-  p_0 = 1.0 - p_1;                       // Probability of Bit = 0
+  p_1 = ((double_t) weight) / (hblocks * 128);     // Probability of Bit = 1
+  p_0 = 1.0 - p_1;                                               // Probability of Bit = 0
   
   r.entropy =  0.0 - ((p_1 * (log2f(p_1))) + (p_0 * (log2f(p_0))));
 
   printf("%0.2f %cbps  Entropy (H): %0.5f\n", bps,  speed_factor, r.entropy);
+  free(f);
   return (r);
 }
 
 
 
 void usage(cell_proc_t* cp){
-  
+  char* out_str = NULL;
   static usage_t u[14];
   int i;
 
@@ -205,8 +205,10 @@ void usage(cell_proc_t* cp){
               u[i].format = malloc(128+1);
               memset(u[i].format, '\0', 128+1);
               strcat(u[i].format,"...");
-              strncpy(u[i].format+3,fmt_vecbe(v, i),30);
+              out_str = fmt_vecbe(v, i);
+              strncpy(u[i].format+3,out_str,30);
               u[i].format[32] = '\0';        
+              free(out_str);
               break;
 
       case 3: u[i].name = "RESERVED";
@@ -282,7 +284,7 @@ void usage(cell_proc_t* cp){
   if (msg == NULL) { halt("Out of Memory");}
   memset(msg, '\0', 10000);
   
-  strcat(msg, "MKRAND - A Randomness Well  [von Neumann] (Test Article 1)\n");
+  strcat(msg, "MKRAND - A Randomness Well  [von Neumann]\n");
   strcat(msg, "Copyright (c) 2013 TAG Universal Machine.\n\n");
   strcat(msg, "USAGE: mkrand [-f format] [-n blocks] [-o filename] [--profile] [--verbose]\n");
   strcat(msg, "Formats:\n");
@@ -293,6 +295,7 @@ void usage(cell_proc_t* cp){
        printf("%2d  - %10s      %40s     %30s\n",i,u[i].name, u[i].format, u[i].description);
        free(u[i].format);
      }  
+  free(v);
   free(msg);
 }
 
@@ -400,6 +403,7 @@ int main(int argc, char *argv[])
     }
 
     if (out_file_name) {
+      if (num_blocks == 0) { halt ("Stream to file not supported."); }
       out_stream = fopen(out_file_name, "w");
       if (out_stream == NULL) { halt ("Error opening output file."); }
     } else {

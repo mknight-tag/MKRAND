@@ -1,0 +1,13 @@
+INSTALLING
+Run:
+$ ./configure
+$ make
+# make install
+
+UNINSTALLING
+For uninstalling, run:
+# make uninstall
+from the top folder of this package
+
+To switch compilers:
+$ ./configure CC=clang

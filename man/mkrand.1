@@ -1,0 +1,52 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "MKRAND" "1" "October 2014" ""TAG Universal Machine"" "MKRAND"
+.
+.SH "NAME"
+\fBmkrand\fR \- A utility for generating random information\.
+.
+.SH "SYNOPSIS"
+\fBmkrand\fR [\-f format] [\-n blocks] [\-o filename] [\-\-profile] [\-\-verbose]
+.
+.SH "DESCRIPTION"
+MKRAND will generate a random bitstream in 128\-bit blocks\.
+.
+.IP "" 4
+.
+.nf
+
+ \-f, \-\-format=<value>
+         0  \- Pure        When output to stdout, prints a 32\-character hexadecimal
+                          When output to file, writes 16 bytes per block
+         1  \- SHA1        SHA1 Format
+         2  \- Binary      Text mode binary
+         4  \- IPV4        IPV4 Address
+         5  \- GUID        Globally Unique ID
+         6  \- IPV6        IPV6 Address
+         8  \- PSI         Time Fingerprint
+         10 \- INT         32\-bit Unsigned Integer
+         11 \- UUID V4     Universally Unique ID
+         12 \- BASE64      Text Encoding using Base64
+
+ \-n
+  Number of 128\-bit blocks to generate, use 0 to generate continuously (stdout only)\.
+
+ \-o
+    Write output to a file\. When format is 0, will write 16 bytes
+    for every block generated\.
+
+ \-\-profile
+    Benchmark the local machine\. Prints the following information:
+        * Speed (bps)
+        * Shannon Entropy (H)
+
+ \-\-verbose
+     Display internal operations while running\.
+.
+.fi
+.
+.IP "" 0
+.
+.SH "COPYRIGHT"
+MKRAND is Copyright (c) 2013, TAG Universal Machine, under the MIT License\.
