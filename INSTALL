@@ -11,3 +11,9 @@ from the top folder of this package
 
 To switch compilers:
 $ ./configure CC=clang
+
+In case of automake version conflict:
+$ autoreconf -i
+
+To bypass automake and make in-place:
+make -f src/Makefile.simple

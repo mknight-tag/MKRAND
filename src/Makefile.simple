@@ -1,0 +1,27 @@
+SDIR=src
+IDIR =$(SDIR)
+CC=gcc
+CFLAGS=-I$(IDIR)
+
+ODIR=src
+
+LIBS=-lm
+
+_DEPS = cell_logic.h command.h fmt_vec.h machine_logic.h
+DEPS = $(patsubst %,$(SDIR)/%,$(_DEPS))
+
+_OBJ = cell_logic.o command.o fmt_vec.o machine_logic.o
+OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+
+$(ODIR)/%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+mkrand: $(OBJ)
+	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+
+.PHONY: clean
+
+clean:
+	rm -f $(ODIR)/*.o *~ core $(SDIR)/*~ 
+
+
