@@ -7,13 +7,8 @@ A Digital Random Bit Generator
 
 An ergodic process, MKRAND produces a statistically homogenous random bitstream. This bitstream is rendered in various formats.
 
-
-**Updates since TA-1:**
-* Streaming, use -n 0
-* Profiler now calculates Shannon entropy (H)
-* Bit-pack vectors for binary file output format
-* Automake
   
+[![Run on Repl.it](https://repl.it/badge/github/unozerocode/MKRAND)](https://repl.it/github/unozerocode/MKRAND)
 
 [![Build Status](https://secure.travis-ci.org/mknight-tag/MKRAND.png?branch=master)](https://travis-ci.org/mknight-tag/MKRAND)
 

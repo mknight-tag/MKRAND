@@ -1,0 +1,2 @@
+language = "bash"
+run = "make -f src/Makefile.simple && ./mkrand -h"
